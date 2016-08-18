@@ -27,7 +27,9 @@ ConfigFactory::registerReader('yml', 'yaml');
 // Adding the parser to the reader
 $reader  = ConfigFactory::getReaderPluginManager()->get('yaml');
 $reader->setYamlDecoder([new YamlParser(), 'parse']);
-define('CONFIG_DIR',  __DIR__ . '/../config');
+if ( ! defined('CONFIG_DIR')) {
+	define('CONFIG_DIR', __DIR__ . '/../config');
+}
 
 $config = ConfigFactory::fromFiles([CONFIG_DIR . '/global.yaml', CONFIG_DIR . '/local.yaml']);
 return $config;

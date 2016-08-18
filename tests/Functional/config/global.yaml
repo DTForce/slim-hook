@@ -1,0 +1,9 @@
+settings:
+  displayErrorDetails: true
+  addContentLengthHeader: false
+  logger:
+    name: slim-hook
+    path: __DIR__ . '/../logs/app.log'
+    level: \Monolog\Logger::DEBUG
+  secret:
+scripts:

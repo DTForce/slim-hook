@@ -1,0 +1,12 @@
+settings:
+  secret: alksjdljzcxl
+scripts:
+  gitlab-org/gitlab-test:
+    deploy:
+      staging: bash /testing-dir/script.bash deploy
+    push:
+      refs/heads/master:
+        cwd: /testing-dir
+        command: bash /testing-dir/script.bash push
+  jsmith/example:
+    tag: bash /testing-dir/script.bash tag

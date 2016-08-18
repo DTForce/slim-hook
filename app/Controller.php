@@ -11,11 +11,6 @@ final class Controller
 {
 
 	/**
-	 * @var ContainerInterface
-	 */
-	private $ci;
-
-	/**
 	 * @var string
 	 */
 	private $secret;
@@ -30,22 +25,26 @@ final class Controller
 	 */
 	private $router;
 
-	public function __construct(ContainerInterface $ci)
+	public function __construct(ContainerInterface $ci, Handler $handler)
 	{
 		$this->ci = $ci;
 		$this->secret = $ci->get('settings')['secret'];
 		$this->scripts = $ci->get('scripts');
 
-		$this->router['pipeline'] = function (array $event) {
+		$this->router['pipeline'] = function (array $event) use($handler) {
 			foreach ($event['builds'] as $build) {
 				if ($build['stage'] === 'deploy') {
-					$this->handleDeploy($event, $build);
+					$handler->handleDeploy($event, $build);
 				}
 			}
 		};
 
-		$this->router['push'] = function (array $event) {
-			$this->handlePush($event);
+		$this->router['push'] = function (array $event) use($handler) {
+			$handler->handlePush($event);
+		};
+
+		$this->router['tag_push'] = function (array $event) use($handler) {
+			$handler->handleTag($event);
 		};
 	}
 
@@ -69,62 +68,6 @@ final class Controller
 
 
 		return $response->withStatus(200);
-	}
-
-
-	private function handleDeploy(array $event, array $build)
-	{
-		if ($build['status'] === 'created') {
-			$projectName = $event['project']['path_with_namespace'];
-			$buildId = $build['id'];
-			$commitId = $event['commit']['id'];
-			$name = $build['name'];
-			if (isset($this->scripts[$projectName]['deploy'][$name])) {
-				putenv('HOOK_PROJECT_PATH=' . $projectName);
-				putenv('HOOK_BUILD_ID=' . $buildId);
-				putenv('HOOK_BUILD_REF=' . $commitId);
-				$this->executeCommand($this->scripts[$projectName]['deploy'][$name]);
-			}
-		}
-	}
-
-
-	private function handlePush(array $event)
-	{
-		$projectName = $event['project']['path_with_namespace'];
-		$ref = $event['ref'];
-		if (isset($this->scripts[$projectName]['push'][$ref])) {
-			putenv('HOOK_PROJECT_PATH=' . $projectName);
-			putenv('HOOK_REF=' . $ref);
-			putenv('HOOK_BRANCH=' . $this->extractBranchName($ref));
-			putenv('HOOK_BUILD_REF=' . $event['after']);
-			$this->executeCommand($this->scripts[$projectName]['push'][$ref]);
-		}
-	}
-
-
-	private function extractBranchName($ref)
-	{
-		return substr($ref, strlen('refs/heads/'));
-	}
-
-
-	/**
-	 * @param string|array $scriptPath
-	 */
-	private function executeCommand($scriptPath)
-	{
-		$oldCwd = NULL;
-		if (is_array($scriptPath)) {
-			$cwd = $scriptPath['cwd'];
-			$scriptPath = $scriptPath['command'];
-			$oldCwd = getcwd();
-			chdir($cwd);
-		}
-		shell_exec($scriptPath);
-		if ($oldCwd !== NULL) {
-			chdir($oldCwd);
-		}
 	}
 
 }
