@@ -2,7 +2,7 @@
 
 namespace Tests\Functional;
 
-class HomepageTest extends AbstractTestCase
+class BasicTest extends AbstractTestCase
 {
 
     public function testDeploy()
