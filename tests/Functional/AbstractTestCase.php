@@ -10,29 +10,9 @@ use Slim\Http\Request;
 use Slim\Http\Response;
 use Slim\Http\Environment;
 
-/**
- * This is an example class that shows how you could set up a method that
- * runs the application. Note that it doesn't cover all use-cases and is
- * tuned to the specifics of this skeleton app, so if your needs are
- * different, you'll need to change it.
- */
 abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 {
-    /**
-     * Use middleware when running application?
-     *
-     * @var bool
-     */
-    protected $withMiddleware = true;
 
-    /**
-     * Process the application given a request method and URI
-     *
-     * @param string $requestMethod the request method (e.g. GET, POST, etc.)
-     * @param string $requestUri the request URI
-     * @param array|object|null $requestData the request data
-     * @return \Slim\Http\Response
-     */
     public function runApp($requestData = null, array $values, $command)
     {
         // Create a mock environment for testing with
@@ -40,7 +20,8 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
             [
                 'REQUEST_METHOD' => 'POST',
                 'REQUEST_URI' => '/',
-				'HTTP_CONTENT_TYPE' => 'application/json'
+				'HTTP_CONTENT_TYPE' => 'application/json',
+				'HTTP_X-Gitlab-Token' => 'alksjdljzcxl'
             ]
         );
 
@@ -80,11 +61,6 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 				return $mock;
 			};
 		}
-
-        // Register middleware
-        if ($this->withMiddleware) {
-            require __DIR__ . '/../../src/middleware.php';
-        }
 
         // Register routes
         require __DIR__ . '/../../src/routes.php';

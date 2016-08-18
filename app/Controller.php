@@ -62,6 +62,10 @@ final class Controller
 			}
 		}
 
+		if ($this->secret !== NULL && ! $this->secured) {
+			return $response->withStatus(403);
+		}
+
 		if (isset($this->router[$body['object_kind']])) {
 			$this->router[$body['object_kind']]($body);
 		}
