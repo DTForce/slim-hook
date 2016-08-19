@@ -1,5 +1,4 @@
 <?php
-// DIC configuration
 
 use App\Controller;
 use App\Executor;

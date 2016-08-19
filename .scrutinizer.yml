@@ -3,3 +3,15 @@ build:
     environment:
         php:
             version: 5.6
+    tests:
+        override:
+            -
+                command: 'phpunit --coverage-clover=.code-clover'
+                coverage:
+                    file: '.code-clover'
+                    format: 'clover'
+
+checks:
+    php:
+        code_rating: true
+        duplication: true
