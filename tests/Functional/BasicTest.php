@@ -61,9 +61,25 @@ class BasicTest extends AbstractTestCase
 
 	public function testNo()
 	{
-		$response = $this->runApp('', [], NULL);
+		$response = $this->runInvalid();
 
 		$this->assertEquals(500, $response->getStatusCode());
+	}
+
+
+	public function testUnsecured()
+	{
+		$response = $this->runUnsecured();
+
+		$this->assertEquals(403, $response->getStatusCode());
+	}
+
+
+	public function testNotHandled()
+	{
+		$response = $this->runNotHandled();
+
+		$this->assertEquals(404, $response->getStatusCode());
 	}
 
 }

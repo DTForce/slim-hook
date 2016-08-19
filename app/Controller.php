@@ -27,9 +27,7 @@ final class Controller
 
 	public function __construct(ContainerInterface $ci, Handler $handler)
 	{
-		$this->ci = $ci;
 		$this->secret = $ci->get('settings')['secret'];
-		$this->scripts = $ci->get('scripts');
 
 		$this->router['pipeline'] = function (array $event) use($handler) {
 			foreach ($event['builds'] as $build) {
@@ -57,7 +55,7 @@ final class Controller
 		}
 
 		foreach ($request->getHeader('X-Gitlab-Token') as $secret) {
-			if ($secret === $this->secret) {
+			if ($secret == $this->secret) { // allow cast
 				$this->secured = TRUE;
 			}
 		}
@@ -68,10 +66,11 @@ final class Controller
 
 		if (isset($this->router[$body['object_kind']])) {
 			$this->router[$body['object_kind']]($body);
+			return $response->withStatus(200);
 		}
 
 
-		return $response->withStatus(200);
+		return $response->withStatus(404);
 	}
 
 }
