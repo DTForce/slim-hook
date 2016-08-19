@@ -1,3 +1,4 @@
+[![Build Status](https://scrutinizer-ci.com/g/DTForce/slim-hook/badges/build.png?b=master)](https://scrutinizer-ci.com/g/DTForce/slim-hook/build-status/master) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/DTForce/slim-hook/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/DTForce/slim-hook/?branch=master) [![Code Coverage](https://scrutinizer-ci.com/g/DTForce/slim-hook/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/DTForce/slim-hook/?branch=master)
 # Gitlab webhook in PHP
 This is a very simple webhook for gitlab, allowing to start bash scripts as a reaction to BUILD, PUSTH and TAG events.
 ## Installation
