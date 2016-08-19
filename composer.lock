@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "ffcb2720b64ef6f0f726a3a40e7edad6",
-    "content-hash": "b20bec6de72dd860bdda3790d7ee72e5",
+    "hash": "4eba7954b7605592d73a854839493bb8",
+    "content-hash": "a13e7d2d1fb70ab169fc239f4f05ad37",
     "packages": [
         {
             "name": "container-interop/container-interop",
@@ -288,55 +288,6 @@
                 "psr-3"
             ],
             "time": "2012-12-21 11:40:51"
-        },
-        {
-            "name": "slim/php-view",
-            "version": "2.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/slimphp/PHP-View.git",
-                "reference": "8bae5b10d10c51596ef8d8113b3b63678718adcb"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/slimphp/PHP-View/zipball/8bae5b10d10c51596ef8d8113b3b63678718adcb",
-                "reference": "8bae5b10d10c51596ef8d8113b3b63678718adcb",
-                "shasum": ""
-            },
-            "require": {
-                "psr/http-message": "^1.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^5.0",
-                "slim/slim": "^3.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Slim\\Views\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Glenn Eggleton",
-                    "email": "geggleto@gmail.com"
-                }
-            ],
-            "description": "Render PHP view scripts into a PSR-7 Response object.",
-            "keywords": [
-                "framework",
-                "php",
-                "phtml",
-                "renderer",
-                "slim",
-                "template",
-                "view"
-            ],
-            "time": "2016-03-04 09:48:50"
         },
         {
             "name": "slim/slim",

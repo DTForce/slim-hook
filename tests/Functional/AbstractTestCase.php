@@ -25,7 +25,6 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
         );
 
 		$request = Request::createFromEnvironment($environment);
-
 		if (isset($requestData)) {
 			$request = $request->withParsedBody(json_decode($requestData, TRUE));
 		}
@@ -47,10 +46,7 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 		);
 
 		$request = Request::createFromEnvironment($environment);
-
-		if (isset($requestData)) {
-			$request = $request->withParsedBody([]);
-		}
+		$request = $request->withParsedBody([]);
 
 		return $this->runRequest($request, $this->buildApp());
 	}
@@ -67,7 +63,6 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 		);
 
 		$request = Request::createFromEnvironment($environment);
-
 		$request = $request->withParsedBody([
 			'object_kind' => 'push'
 		]);
