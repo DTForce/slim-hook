@@ -6,9 +6,9 @@ build:
     tests:
         override:
             -
-                command: 'phpunit --coverage-clover=code-clover'
+                command: 'phpunit --coverage-clover=coverage.xml'
                 coverage:
-                    file: 'code-clover'
+                    file: 'coverage.xml'
                     format: 'clover'
 
 checks:
