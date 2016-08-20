@@ -97,7 +97,7 @@ Example:
     "nested" : {
         "a" : "b",
         "asd" : "c"
-    }
+    },
     "array" : ["asd", "zxc", "xcvxcv"]
 }
 ```
