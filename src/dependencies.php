@@ -16,8 +16,8 @@ $container[Handler::class] = function (ContainerInterface $c) {
 	return new Handler($c, $c->get(Executor::class));
 };
 
-$container[Executor::class] = function (ContainerInterface $c) {
-	return new Executor($c);
+$container[Executor::class] = function () {
+	return new Executor();
 };
 
 // monolog

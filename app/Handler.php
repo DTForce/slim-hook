@@ -63,12 +63,11 @@ class Handler
 	public function handleTag(array $event)
 	{
 		$projectName = $event['project']['path_with_namespace'];
-		$ref = $event['ref'];
 		if (isset($this->scripts[$projectName]['tag'])) {
 			$this->executeCommand($this->scripts[$projectName]['tag'], [
 				'HOOK_PROJECT_PATH' => $projectName,
-				'HOOK_REF' => $ref,
-				'HOOK_TAG'=> $this->extractTagName($ref),
+				'HOOK_REF' => $event['ref'],
+				'HOOK_TAG'=> $this->extractTagName($event['ref']),
 				'HOOK_BUILD_REF' => $event['after']
 			]);
 		}

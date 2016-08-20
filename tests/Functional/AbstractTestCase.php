@@ -73,7 +73,7 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 		$app = $this->buildApp();
 
 		if ($command !== NULL) {
-			$app->getContainer()[Executor::class] = function (ContainerInterface $c) use ($values, $command) {
+			$app->getContainer()[Executor::class] = function () use ($values, $command) {
 				$mock = $this->getMockBuilder(Executor::class)
 					->setMethods(['executeCommand'])
 					->getMock();
