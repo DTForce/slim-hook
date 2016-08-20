@@ -2,8 +2,15 @@
 
 namespace Tests\Functional;
 
-class BasicTest extends AbstractTestCase
+class HookTest extends AbstractTestCase
 {
+
+	public static function setUpBeforeClass()
+	{
+		self::setPath('/');
+		self::setSecurityHeader('X-Gitlab-Token');
+	}
+
 
     public function testDeploy()
     {

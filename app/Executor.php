@@ -9,7 +9,7 @@ class Executor
 	 * @param string|array $scriptPath
 	 * @param array $env
 	 */
-	public function executeCommand($scriptPath, array $env)
+	public function executeCommand($scriptPath, array $env = [])
 	{
 		$oldCwd = NULL;
 		if (is_array($scriptPath)) {
@@ -26,12 +26,14 @@ class Executor
 		foreach ($env as $key => $value) {
 			putenv($key . '=' . $value);
 		}
+		$result = '';
 		foreach ($commands as $command) {
-			shell_exec($command);
+			$result .= shell_exec($command);
 		}
 		if ($oldCwd !== NULL) {
 			chdir($oldCwd);
 		}
+		return $result;
 	}
 
 }

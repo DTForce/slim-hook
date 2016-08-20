@@ -47,7 +47,7 @@ final class HookController
 	}
 
 
-	public function __invoke(Request $request, Response $response, $args)
+	public function __invoke(Request $request, Response $response, array $args)
 	{
 		$body = $request->getParsedBody();
 		if ( ! isset($body['object_kind'])) {

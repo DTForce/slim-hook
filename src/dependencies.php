@@ -1,5 +1,6 @@
 <?php
 
+use App\BashRestController;
 use App\HookController;
 use App\Executor;
 use App\Handler;
@@ -10,6 +11,10 @@ $container = $app->getContainer();
 
 $container[HookController::class] = function (ContainerInterface $c) {
 	return new HookController($c, $c->get(Handler::class));
+};
+
+$container[BashRestController::class] = function (ContainerInterface $c) {
+	return new BashRestController($c, $c->get(Executor::class));
 };
 
 $container[Handler::class] = function (ContainerInterface $c) {

@@ -12,3 +12,10 @@ scripts:
         command: bash /testing-dir/script.bash push
   jsmith/example:
     tag: bash test.bash xcasdzcxzsdda
+bashREST:
+  bash-rest/test-app:
+    action1: test
+    action2:
+      cwd: dir
+      0: test1
+      1: test2

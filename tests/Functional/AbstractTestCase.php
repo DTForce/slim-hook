@@ -3,7 +3,6 @@
 namespace Tests\Functional;
 
 use App\Executor;
-use Interop\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Slim\App;
 use Slim\Http\Request;
@@ -12,6 +11,27 @@ use Slim\Http\Environment;
 
 abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 {
+	private static $path;
+	private static $securityHeader;
+
+
+	/**
+	 * @param string $path
+	 */
+	public static function setPath($path)
+	{
+		self::$path = $path;
+	}
+
+
+	/**
+	 * @param string $securityHeader
+	 */
+	public static function setSecurityHeader($securityHeader)
+	{
+		self::$securityHeader = $securityHeader;
+	}
+
 
 	final protected function runAppMocked($requestData, array $values, $command)
     {
@@ -78,9 +98,14 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 					->setMethods(['executeCommand'])
 					->getMock();
 
-				$mock->expects($this->once())
-					->method('executeCommand')
-					->with($this->equalTo($command), $this->equalTo($values));
+				if ($command !== NULL) {
+					$mock->expects($this->once())
+						->method('executeCommand')
+						->with($this->equalTo($command), $this->equalTo($values));
+				} else {
+					$mock->expects($this->never())
+						->method('executeCommand');
+				}
 
 				return $mock;
 			};
@@ -153,12 +178,12 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 	{
 		$data = [
 			'REQUEST_METHOD' => 'POST',
-			'REQUEST_URI' => '/',
+			'REQUEST_URI' => self::$path,
 			'HTTP_CONTENT_TYPE' => 'application/json'
 		];
 
 		if ($secret !== NULL) {
-			$data['HTTP_X-Gitlab-Token'] = $secret;
+			$data['HTTP_' . self::$securityHeader] = $secret;
 		}
 
 		return Environment::mock($data);
