@@ -18,6 +18,12 @@ trait SecuredTrait
 {
 
 	/**
+	 * @var string
+	 */
+	private $secret;
+
+
+	/**
 	 * @param Request $request
 	 * @return bool
 	 */

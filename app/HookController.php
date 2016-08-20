@@ -15,11 +15,6 @@ final class HookController
 	const SECRET_HEADER = 'X-Gitlab-Token';
 
 	/**
-	 * @var string
-	 */
-	private $secret;
-
-	/**
 	 * @var callable[]
 	 */
 	private $router;

@@ -30,14 +30,10 @@ final class BashRestController
 	private $executor;
 
 	/**
-	 * @var string
-	 */
-	private $secret;
-
-	/**
 	 * @var array
 	 */
 	private $scripts;
+
 
 	public function __construct(ContainerInterface $ci, Executor $executor)
 	{
