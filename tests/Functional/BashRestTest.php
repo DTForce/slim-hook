@@ -117,6 +117,18 @@ class BashRestTest extends AbstractTestCase
 	}
 
 
+	public function testExecutorPushErrorTag()
+	{
+		self::setPath('/groupName/projectName/error');
+		$result = shell_exec("bash -c \"echo abc\"");
+		if ($result === "abc\n") {
+			$response = $this->runApp('{"ENV":"production"}');
+
+			$this->assertEquals(500, $response->getStatusCode());
+		}
+	}
+
+
 	/**
 	 * @param string $data
 	 * @param array $env
