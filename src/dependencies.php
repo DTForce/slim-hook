@@ -1,6 +1,6 @@
 <?php
 
-use App\Controller;
+use App\HookController;
 use App\Executor;
 use App\Handler;
 use Interop\Container\ContainerInterface;
@@ -8,8 +8,8 @@ use Interop\Container\ContainerInterface;
 
 $container = $app->getContainer();
 
-$container[Controller::class] = function (ContainerInterface $c) {
-	return new Controller($c, $c->get(Handler::class));
+$container[HookController::class] = function (ContainerInterface $c) {
+	return new HookController($c, $c->get(Handler::class));
 };
 
 $container[Handler::class] = function (ContainerInterface $c) {

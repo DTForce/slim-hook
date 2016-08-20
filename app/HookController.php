@@ -7,7 +7,7 @@ use Slim\Http\Request;
 use Slim\Http\Response;
 
 
-final class Controller
+final class HookController
 {
 
 	/**
