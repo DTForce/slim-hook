@@ -2,6 +2,9 @@
 
 namespace App;
 
+use App\Exception\ExecutionFailed;
+
+
 class Executor
 {
 
@@ -9,6 +12,7 @@ class Executor
 	 * @param string|array $scriptPath
 	 * @param array $env
 	 * @return string
+	 * @throws ExecutionFailed
 	 */
 	public function executeCommand($scriptPath, array $env = [])
 	{
@@ -27,14 +31,17 @@ class Executor
 		foreach ($env as $key => $value) {
 			putenv($key . '=' . $value);
 		}
-		$result = '';
+		$result = [];
 		foreach ($commands as $command) {
-			$result .= shell_exec($command);
+			exec($command, $result, $return);
+			if ($return !== 0) {
+				throw new ExecutionFailed('Command ' . $command . 'resulted in error: ' . $return, $return);
+			}
 		}
 		if ($oldCwd !== NULL) {
 			chdir($oldCwd);
 		}
-		return $result;
+		return implode("\n", $result);
 	}
 
 }

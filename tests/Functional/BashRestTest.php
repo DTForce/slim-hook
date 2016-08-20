@@ -104,6 +104,19 @@ class BashRestTest extends AbstractTestCase
 	}
 
 
+	public function testExecutorPushTag()
+	{
+		self::setPath('/groupName/projectName/deploy');
+		$result = shell_exec("bash -c \"echo abc\"");
+		if ($result === "abc\n") {
+			$response = $this->runApp('{"ENV":"production"}');
+
+			$this->assertEquals(200, $response->getStatusCode());
+			$this->assertEquals("Application groupName/projectName action deploy called with ENV set to production", (string)$response->getBody());
+		}
+	}
+
+
 	/**
 	 * @param string $data
 	 * @param array $env

@@ -19,3 +19,5 @@ bashREST:
       cwd: dir
       0: test1
       1: test2
+  groupName/projectName:
+    deploy: echo Application $HOOK_PROJECT_PATH action $HOOK_ACTION called with ENV set to $HOOK_ENV

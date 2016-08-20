@@ -11,6 +11,7 @@
 
 namespace App;
 
+use App\Exception\ExecutionFailed;
 use Interop\Container\ContainerInterface;
 use InvalidArgumentException;
 use Slim\Http\Request;
@@ -51,6 +52,7 @@ final class BashRestController
 	 */
 	public function __invoke(Request $request, Response $response, array $args)
 	{
+		$response = $response->withHeader('Content-Type', 'application/text;charset=utf-8');
 		if ( ! $this->isSecured($request)) {
 			return $response->withStatus(403);
 		}
@@ -62,8 +64,7 @@ final class BashRestController
 			return $response->withStatus(404);
 		}
 
-		$response = $this->handle($request, $response, $projectName, $action);
-		return $response->withStatus(200);
+		return $this->handle($request, $response, $projectName, $action);
 	}
 
 
@@ -142,17 +143,26 @@ final class BashRestController
 	 */
 	private function handle(Request $request, Response $response, $projectName, $action)
 	{
-		$defaultEnv =  ['HOOK_PROJECT_PATH' => $projectName, 'HOOK_ACTION' => $action];
-		$result = $this->executor->executeCommand(
-			$this->scripts[$projectName][$action],
-			$this->flatten($request->getParsedBody()) + $defaultEnv
-		);
+		try {
+			$defaultEnv = ['HOOK_PROJECT_PATH' => $projectName, 'HOOK_ACTION' => $action];
+			$result = $this->executor->executeCommand(
+				$this->scripts[$projectName][$action],
+				$this->flatten($request->getParsedBody()) + $defaultEnv
+			);
 
-		$body = $response->getBody();
-		$body->rewind();
-		$body->write($result);
+			$body = $response->getBody();
+			$body->rewind();
+			$body->write($result);
 
-		return $response->withHeader('Content-Type', 'application/text;charset=utf-8');
+			return $response->withStatus(200);
+		} catch (ExecutionFailed $e) {
+
+			$body = $response->getBody();
+			$body->rewind();
+			$body->write($e->getMessage());
+
+			return $response->withStatus(500);
+		}
 	}
 
 }
