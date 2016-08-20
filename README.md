@@ -125,7 +125,8 @@ bashREST:
 
 and assume, `shell_exec` launches `sh` or `bash`, then call the action like this:
 ```bash
-curl -X POST http://localhost:4000/groupName/projectName/deploy -H "X-Secret: $BASH_REST_SECRET" -H 'Content-Type: application/json' -d '{"ENV":"production"}'
+curl -X POST http://localhost:4000/groupName/projectName/deploy -H \
+    "X-Secret: $BASH_REST_SECRET" -H 'Content-Type: application/json' -d '{"ENV":"production"}'
 ```
 
 The response will be returned as `application/text` containing result(written to `stdout`)
