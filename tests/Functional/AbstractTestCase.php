@@ -7,6 +7,7 @@ use PHPUnit_Framework_MockObject_Stub_ReturnCallback;
 use Psr\Http\Message\ResponseInterface;
 use Slim\App;
 use Slim\Http\Request;
+use Slim\Http\RequestBody;
 use Slim\Http\Response;
 use Slim\Http\Environment;
 
@@ -14,6 +15,8 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 {
 	private static $path;
 	private static $securityHeader;
+
+	const SECRET = 'alksjdljzcxl';
 
 
 	/**
@@ -34,50 +37,56 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 	}
 
 
+	/**
+	 * @return Response
+	 */
 	final protected function runAppMocked($requestData, array $values, $command)
     {
-		$request = $this->prepareRequest('alksjdljzcxl')
-			->withParsedBody(json_decode($requestData, TRUE));
-
+		$request = $this->prepareRequest(self::SECRET, $requestData);
 		return $this->assertCommandEnvironment($request, $values, $command);
 	}
 
+
+	/**
+	 * @return Response
+	 */
 	final protected function runApp($requestData, array $settings = [])
 	{
-		$request = $this->prepareRequest('alksjdljzcxl')
-			->withParsedBody(json_decode($requestData, TRUE));
-
+		$request = $this->prepareRequest(self::SECRET, $requestData);
 		return $this->runRequest($request, $this->buildApp($settings));
 	}
 
 
+	/**
+	 * @return Response
+	 */
 	final protected function runInvalid()
 	{
-		$request = $this->prepareRequest('alksjdljzcxl')
-			->withParsedBody([]);
-
+		$request = $this->prepareRequest(self::SECRET, [], TRUE);
 		return $this->runRequest($request, $this->buildApp());
 	}
 
 
+	/**
+	 * @return Response
+	 */
 	final protected function runUnsecured()
 	{
-		$request = $this->prepareRequest()
-			->withParsedBody([
-				'object_kind' => 'push'
-			]);
-
+		$request = $this->prepareRequest(NULL, [
+			'object_kind' => 'push'
+		], TRUE);
 		return $this->runRequest($request, $this->buildApp());
 	}
 
 
+	/**
+	 * @return Response
+	 */
 	final protected function runNotHandled()
 	{
-		$request = $this->prepareRequest('alksjdljzcxl')
-			->withParsedBody([
-				'object_kind' => 'test'
-			]);
-
+		$request = $this->prepareRequest(self::SECRET, [
+			'object_kind' => 'test'
+		], TRUE);
 		return $this->runRequest($request, $this->buildApp());
 	}
 
@@ -88,34 +97,52 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 	 * @param string $command
 	 * @return ResponseInterface|Response
 	 */
-	private function assertCommandEnvironment(Request $request, array $values, $command)
+	final protected function assertCommandEnvironment(Request $request, array $values, $command)
 	{
-
 		$app = $this->buildApp();
 
-		if ($command !== NULL) {
-			$app->getContainer()[Executor::class] = function () use ($values, $command) {
-				$mock = $this->getMockBuilder(Executor::class)
-					->setMethods(['executeCommand'])
-					->getMock();
+		$app->getContainer()[Executor::class] = function () use ($values, $command) {
+			$mock = $this->getMockBuilder(Executor::class)
+				->setMethods(['executeCommand'])
+				->getMock();
 
-				if ($command !== NULL) {
-					$mock->expects($this->once())
-						->method('executeCommand')
-						->with($this->equalTo($command), $this->equalTo($values))
-						->will(new PHPUnit_Framework_MockObject_Stub_ReturnCallback(function ($command, $values) {
-							return $values;
-						}));
-				} else {
-					$mock->expects($this->never())
-						->method('executeCommand');
-				}
+			if ($command !== NULL) {
+				$mock->expects($this->once())
+					->method('executeCommand')
+					->with($this->equalTo($command), $this->equalTo($values))
+					->will(new PHPUnit_Framework_MockObject_Stub_ReturnCallback(function ($command, $values) {
+						return $values;
+					}));
+			} else {
+				$mock->expects($this->never())
+					->method('executeCommand');
+			}
 
-				return $mock;
-			};
-		}
+			return $mock;
+		};
 
 		return $this->runRequest($request, $app);
+	}
+
+
+	/**
+	 * @param Request $request
+	 * @param App $app
+	 * @return Response
+	 */
+	final protected function runRequest(Request $request, App $app)
+	{
+		// Register routes
+		require __DIR__ . '/../../src/routes.php';
+
+		// Set up a response object
+		$response = new Response();
+
+		// Process the application
+		$response = $app->process($request, $response);
+
+		// Return the response
+		return $response;
 	}
 
 
@@ -123,7 +150,7 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 	 * @param array $settingsOverride
 	 * @return App
 	 */
-	private function buildApp(array $settingsOverride = [])
+	final protected function buildApp(array $settingsOverride = [])
 	{
 		// Use the application settings
 		if ( ! defined('CONFIG_DIR')) {
@@ -144,33 +171,18 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 
 
 	/**
-	 * @param Request $request
-	 * @param App $app
-	 * @return Response
-	 */
-	private function runRequest(Request $request, App $app)
-	{
-		// Register routes
-		require __DIR__ . '/../../src/routes.php';
-
-		// Set up a response object
-		$response = new Response();
-
-		// Process the application
-		$response = $app->process($request, $response);
-
-		// Return the response
-		return $response;
-	}
-
-
-	/**
 	 * @param string|NULL $secret
+	 * @param array|string $data
+	 * @param bool $encode
 	 * @return Request
 	 */
-	private function prepareRequest($secret = NULL)
+	protected function prepareRequest($secret = NULL, $data = '', $encode = FALSE)
 	{
-		return Request::createFromEnvironment($this->prepareEnvironment($secret));
+		$body = new RequestBody();
+		$body->write($encode ? json_encode($data) : $data);
+
+		return Request::createFromEnvironment($this->prepareEnvironment($secret))
+			->withBody($body);
 	}
 
 

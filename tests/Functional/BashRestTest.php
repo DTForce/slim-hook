@@ -2,6 +2,10 @@
 
 namespace Tests\Functional;
 
+use InvalidArgumentException;
+use Slim\Http\RequestBody;
+
+
 class BashRestTest extends AbstractTestCase
 {
 
@@ -14,7 +18,7 @@ class BashRestTest extends AbstractTestCase
 	public function testAction1()
 	{
 		self::setPath('/bash-rest/test-app/action1');
-		$this->simpleTest('[]', [] , 'test');
+		$this->simpleTest('', [] , 'test');
 	}
 
 
@@ -78,6 +82,31 @@ class BashRestTest extends AbstractTestCase
 	}
 
 
+	public function testParsedBodyObject()
+	{
+		$this->setExpectedExceptionRegExp(InvalidArgumentException::class, '#Unexpected parser result.#');
+
+		$body = new RequestBody();
+		$body->write(json_encode(['data' => 'abc']));
+
+		self::setPath('/bash-rest/test-app/action1');
+		$request = $this->prepareRequest(self::SECRET)
+			->withBody($body);
+
+		$request->registerMediaTypeParser('application/json', function ($input) {
+				return json_decode($input);
+			});
+
+		$response  = $this->runRequest($request, $this->buildApp());
+		$this->assertEquals(200, $response->getStatusCode());
+	}
+
+
+	/**
+	 * @param string $data
+	 * @param array $env
+	 * @param string $command
+	 */
 	protected function simpleTest($data, array $env, $command)
 	{
 		$response = $this->runAppMocked($data, $env, $command);

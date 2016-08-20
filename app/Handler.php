@@ -22,7 +22,7 @@ class Handler
 	public function __construct(ContainerInterface $ci, Executor $executor)
 	{
 		$this->executor = $executor;
-		$this->scripts = $ci->get('scripts');
+		$this->scripts = (array) $ci->get('scripts');
 	}
 
 
@@ -74,12 +74,20 @@ class Handler
 	}
 
 
+	/**
+	 * @param string $ref
+	 * @return string
+	 */
 	private function extractBranchName($ref)
 	{
 		return substr($ref, strlen('refs/heads/'));
 	}
 
 
+	/**
+	 * @param string $ref
+	 * @return string
+	 */
 	private function extractTagName($ref)
 	{
 		return substr($ref, strlen('refs/tags/'));

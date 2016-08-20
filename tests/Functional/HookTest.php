@@ -144,6 +144,11 @@ class HookTest extends AbstractTestCase
 	}
 
 
+	/**
+	 * @param string $file
+	 * @param array $env
+	 * @param string $command
+	 */
 	protected function simpleTest($file, array $env, $command)
 	{
 		$response = $this->runAppMocked(file_get_contents($file), $env, $command);

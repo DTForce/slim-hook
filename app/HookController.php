@@ -27,7 +27,7 @@ final class HookController
 
 	public function __construct(ContainerInterface $ci, Handler $handler)
 	{
-		$this->secret = $ci->get('settings')['secret'];
+		$this->secret = (string) $ci->get('settings')['secret'];
 
 		$this->router['pipeline'] = function (array $event) use($handler) {
 			foreach ($event['builds'] as $build) {

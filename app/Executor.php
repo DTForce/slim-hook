@@ -8,6 +8,7 @@ class Executor
 	/**
 	 * @param string|array $scriptPath
 	 * @param array $env
+	 * @return string
 	 */
 	public function executeCommand($scriptPath, array $env = [])
 	{

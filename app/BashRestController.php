@@ -40,11 +40,17 @@ final class BashRestController
 	public function __construct(ContainerInterface $ci, Executor $executor)
 	{
 		$this->executor = $executor;
-		$this->secret = $ci->get('settings')['secret'];
-		$this->scripts = $ci->get('bashREST');
+		$this->secret = (string) $ci->get('settings')['secret'];
+		$this->scripts = (array) $ci->get('bashREST');
 	}
 
 
+	/**
+	 * @param Request $request
+	 * @param Response $response
+	 * @param array $args
+	 * @return Response
+	 */
 	public function __invoke(Request $request, Response $response, array $args)
 	{
 		$secured = FALSE;
@@ -75,13 +81,17 @@ final class BashRestController
 	}
 
 
+	/**
+	 * @param array|NULL $data
+	 * @return array
+	 */
 	private function flatten($data)
 	{
 		if ($data === NULL) {
 			return [];
 		}
 
-		if ( is_object($data)) {
+		if (is_object($data)) {
 			throw new InvalidArgumentException('Unexpected parser result.');
 		}
 
@@ -94,19 +104,36 @@ final class BashRestController
 
 		while ( ! empty($toProcess)) {
 			$actual = array_pop($toProcess);
-			foreach ($actual['data'] as $key => $value) {
-				if (is_scalar($value)) {
-					$flattened[$actual['prefix'] . '_' . $key] = $value;
-				} else if (is_array($value)) {
-					array_push($toProcess, [
-						'data' => $value,
-						'prefix' => $actual['prefix'] . '_' . $key
-					]);
-				}
-			}
+			$this->flattenProcessArray($actual, $flattened, $toProcess);
 		}
 
 		return $flattened;
+	}
+
+
+	/**
+	 * @param array $actual
+	 * @param array $flattened
+	 * @param array $toProcess
+	 * @return array
+	 */
+	private function flattenProcessArray(array $actual, array &$flattened, array &$toProcess)
+	{
+		foreach ($actual['data'] as $key => $value) {
+			if (is_scalar($value)) {
+				$flattened[$actual['prefix'] . '_' . $key] = $value;
+			} else {
+				if (is_array($value)) {
+					array_push(
+						$toProcess,
+						[
+							'data' => $value,
+							'prefix' => $actual['prefix'] . '_' . $key
+						]
+					);
+				}
+			}
+		}
 	}
 
 }
