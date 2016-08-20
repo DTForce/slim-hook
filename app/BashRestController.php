@@ -12,6 +12,7 @@
 namespace App;
 
 use Interop\Container\ContainerInterface;
+use InvalidArgumentException;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
@@ -74,8 +75,16 @@ final class BashRestController
 	}
 
 
-	private function flatten(array $data)
+	private function flatten($data)
 	{
+		if ($data === NULL) {
+			return [];
+		}
+
+		if ( is_object($data)) {
+			throw new InvalidArgumentException('Unexpected parser result.');
+		}
+
 		$toProcess = [[
 			'data' => $data,
 			'prefix' => 'HOOK'
