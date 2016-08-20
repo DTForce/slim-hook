@@ -13,40 +13,27 @@ use Slim\Http\Environment;
 abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 {
 
-	final protected function runApp($requestData = null, array $values, $command)
+	final protected function runAppMocked($requestData, array $values, $command)
     {
-        $environment = Environment::mock(
-            [
-                'REQUEST_METHOD' => 'POST',
-                'REQUEST_URI' => '/',
-				'HTTP_CONTENT_TYPE' => 'application/json',
-				'HTTP_X-Gitlab-Token' => 'alksjdljzcxl'
-            ]
-        );
+		$request = $this->prepareRequest('alksjdljzcxl')
+			->withParsedBody(json_decode($requestData, TRUE));
 
-		$request = Request::createFromEnvironment($environment);
-		if (isset($requestData)) {
-			$request = $request->withParsedBody(json_decode($requestData, TRUE));
-		}
+		return $this->assertCommandEnvironment($request, $values, $command);
+	}
 
-		return $this->assertComandEnvironment($request, $values, $command);
+	final protected function runApp($requestData, array $settings = [])
+	{
+		$request = $this->prepareRequest('alksjdljzcxl')
+			->withParsedBody(json_decode($requestData, TRUE));
 
+		return $this->runRequest($request, $this->buildApp($settings));
 	}
 
 
 	final protected function runInvalid()
 	{
-		$environment = Environment::mock(
-			[
-				'REQUEST_METHOD' => 'POST',
-				'REQUEST_URI' => '/',
-				'HTTP_CONTENT_TYPE' => 'application/json',
-				'HTTP_X-Gitlab-Token' => 'alksjdljzcxl'
-			]
-		);
-
-		$request = Request::createFromEnvironment($environment);
-		$request = $request->withParsedBody([]);
+		$request = $this->prepareRequest('alksjdljzcxl')
+			->withParsedBody([]);
 
 		return $this->runRequest($request, $this->buildApp());
 	}
@@ -54,18 +41,10 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 
 	final protected function runUnsecured()
 	{
-		$environment = Environment::mock(
-			[
-				'REQUEST_METHOD' => 'POST',
-				'REQUEST_URI' => '/',
-				'HTTP_CONTENT_TYPE' => 'application/json',
-			]
-		);
-
-		$request = Request::createFromEnvironment($environment);
-		$request = $request->withParsedBody([
-			'object_kind' => 'push'
-		]);
+		$request = $this->prepareRequest()
+			->withParsedBody([
+				'object_kind' => 'push'
+			]);
 
 		return $this->runRequest($request, $this->buildApp());
 	}
@@ -73,20 +52,10 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 
 	final protected function runNotHandled()
 	{
-		$environment = Environment::mock(
-			[
-				'REQUEST_METHOD' => 'POST',
-				'REQUEST_URI' => '/',
-				'HTTP_CONTENT_TYPE' => 'application/json',
-				'HTTP_X-Gitlab-Token' => 'alksjdljzcxl'
-			]
-		);
-
-		$request = Request::createFromEnvironment($environment);
-
-		$request = $request->withParsedBody([
-			'object_kind' => 'test'
-		]);
+		$request = $this->prepareRequest('alksjdljzcxl')
+			->withParsedBody([
+				'object_kind' => 'test'
+			]);
 
 		return $this->runRequest($request, $this->buildApp());
 	}
@@ -98,7 +67,7 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 	 * @param string $command
 	 * @return ResponseInterface|Response
 	 */
-	private function assertComandEnvironment(Request $request, array $values, $command)
+	private function assertCommandEnvironment(Request $request, array $values, $command)
 	{
 
 		$app = $this->buildApp();
@@ -122,18 +91,21 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 
 
 	/**
+	 * @param array $settingsOverride
 	 * @return App
 	 */
-	private function buildApp()
+	private function buildApp(array $settingsOverride = [])
 	{
 		// Use the application settings
 		if ( ! defined('CONFIG_DIR')) {
 			define('CONFIG_DIR', __DIR__ . '/config');
 		}
 		$settings = require __DIR__ . '/../../src/settings.php';
+		$settings = array_replace_recursive($settings, $settingsOverride);
 
 		// Instantiate the application
 		$app = new App($settings);
+		unset($app->getContainer()['errorHandler']);
 
 		// Set up dependencies
 		require __DIR__ . '/../../src/dependencies.php';
@@ -161,4 +133,35 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 		// Return the response
 		return $response;
 	}
+
+
+	/**
+	 * @param string|NULL $secret
+	 * @return Request
+	 */
+	private function prepareRequest($secret = NULL)
+	{
+		return Request::createFromEnvironment($this->prepareEnvironment($secret));
+	}
+
+
+	/**
+	 * @param string|NULL $secret
+	 * @return Environment
+	 */
+	private function prepareEnvironment($secret = NULL)
+	{
+		$data = [
+			'REQUEST_METHOD' => 'POST',
+			'REQUEST_URI' => '/',
+			'HTTP_CONTENT_TYPE' => 'application/json'
+		];
+
+		if ($secret !== NULL) {
+			$data['HTTP_X-Gitlab-Token'] = $secret;
+		}
+
+		return Environment::mock($data);
+	}
+
 }

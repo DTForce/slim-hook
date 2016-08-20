@@ -12,15 +12,22 @@ class Executor
 	{
 		$oldCwd = NULL;
 		if (is_array($scriptPath)) {
-			$cwd = $scriptPath['cwd'];
-			$scriptPath = $scriptPath['command'];
-			$oldCwd = getcwd();
-			chdir($cwd);
+			if (isset($scriptPath['cwd'])) {
+				$cwd = $scriptPath['cwd'];
+				unset($scriptPath['cwd']);
+				$oldCwd = getcwd();
+				chdir($cwd);
+			}
+			$commands = $scriptPath;
+		} else {
+			$commands = [$scriptPath];
 		}
 		foreach ($env as $key => $value) {
 			putenv($key . '=' . $value);
 		}
-		shell_exec($scriptPath);
+		foreach ($commands as $command) {
+			shell_exec($command);
+		}
 		if ($oldCwd !== NULL) {
 			chdir($oldCwd);
 		}

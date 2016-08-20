@@ -7,7 +7,7 @@ class BasicTest extends AbstractTestCase
 
     public function testDeploy()
     {
-		$response = $this->runApp(
+		$response = $this->runAppMocked(
 			file_get_contents(__DIR__ . '/data/pipeline.json'),
 			[
 				'HOOK_PROJECT_PATH' => 'gitlab-org/gitlab-test',
@@ -15,7 +15,10 @@ class BasicTest extends AbstractTestCase
 				'HOOK_BUILD_REF' => 'bcbb5ec396a2c0f828686f14fac9b80b780504f2',
 				'HOOK_ENV_NAME' => 'staging'
 			],
-			'bash /testing-dir/script.bash deploy'
+			[
+				'bash /testing-dir/script.bash deploy',
+				'bash do-something-else'
+			]
 		);
 
         $this->assertEquals(200, $response->getStatusCode());
@@ -24,7 +27,7 @@ class BasicTest extends AbstractTestCase
 
     public function testPush()
     {
-		$response = $this->runApp(
+		$response = $this->runAppMocked(
 			file_get_contents(__DIR__ . '/data/push.json'),
 			[
 				'HOOK_PROJECT_PATH' => 'gitlab-org/gitlab-test',
@@ -44,7 +47,7 @@ class BasicTest extends AbstractTestCase
 
 	public function testPushTag()
 	{
-		$response = $this->runApp(
+		$response = $this->runAppMocked(
 			file_get_contents(__DIR__ . '/data/tag.json'),
 			[
 				'HOOK_PROJECT_PATH' => 'jsmith/example',
@@ -52,10 +55,70 @@ class BasicTest extends AbstractTestCase
 				'HOOK_TAG' => 'v1.0.0',
 				'HOOK_BUILD_REF' => '82b3d5ae55f7080f1e6022629cdb57bfae7cccc7'
 			],
-			'bash /testing-dir/script.bash tag'
+			'bash test.bash xcasdzcxzsdda'
 		);
 
 		$this->assertEquals(200, $response->getStatusCode());
+	}
+
+
+	public function testExecutorPushTag()
+	{
+		$result = shell_exec("bash -c \"echo abc\"");
+		if ($result === "abc\n") {
+			@unlink(__DIR__ . '/log');
+
+			$response = $this->runApp(file_get_contents(__DIR__ . '/data/tag.json') , [
+				'scripts' => [
+					'jsmith/example' => [
+						'tag' => [
+							'cwd' => __DIR__,
+							'bash test.bash ABC',
+							'bash test.bash CDE'
+						]
+					]
+				]
+			]);
+			$logFile = file_get_contents(__DIR__ . '/log');
+			$this->assertEquals(
+				"jsmith/example refs/tags/v1.0.0 v1.0.0 82b3d5ae55f7080f1e6022629cdb57bfae7cccc7 ABC\n" .
+				"jsmith/example refs/tags/v1.0.0 v1.0.0 82b3d5ae55f7080f1e6022629cdb57bfae7cccc7 CDE\n",
+				$logFile
+			);
+
+			$this->assertEquals(200, $response->getStatusCode());
+
+			unlink(__DIR__ . '/log');
+		}
+	}
+
+
+	public function testExecutorSinglePushTag()
+	{
+		$result = shell_exec("bash -c \"echo abc\"");
+		if ($result === "abc\n") {
+			@unlink(__DIR__ . '/log');
+			$oldDir = getcwd();
+			chdir(__DIR__);
+
+			$response = $this->runApp(file_get_contents(__DIR__ . '/data/tag.json') , [
+				'scripts' => [
+					'jsmith/example' => [
+						'tag' => 'bash test.bash DEF'
+					]
+				]
+			]);
+			$logFile = file_get_contents(__DIR__ . '/log');
+			$this->assertEquals(
+				"jsmith/example refs/tags/v1.0.0 v1.0.0 82b3d5ae55f7080f1e6022629cdb57bfae7cccc7 DEF\n",
+				$logFile
+			);
+
+			$this->assertEquals(200, $response->getStatusCode());
+
+			chdir($oldDir);
+			unlink(__DIR__ . '/log');
+		}
 	}
 
 

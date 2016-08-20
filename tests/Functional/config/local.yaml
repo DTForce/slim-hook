@@ -3,10 +3,12 @@ settings:
 scripts:
   gitlab-org/gitlab-test:
     deploy:
-      staging: bash /testing-dir/script.bash deploy
+      staging:
+        - bash /testing-dir/script.bash deploy
+        - bash do-something-else
     push:
       refs/heads/master:
         cwd: /testing-dir
         command: bash /testing-dir/script.bash push
   jsmith/example:
-    tag: bash /testing-dir/script.bash tag
+    tag: bash test.bash xcasdzcxzsdda
