@@ -5,7 +5,7 @@ namespace App;
 use Interop\Container\ContainerInterface;
 
 
-class Handler
+class HookHandler
 {
 
 	/**

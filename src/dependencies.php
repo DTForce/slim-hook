@@ -3,22 +3,22 @@
 use App\BashRestController;
 use App\HookController;
 use App\Executor;
-use App\Handler;
+use App\HookHandler;
 use Interop\Container\ContainerInterface;
 
 
 $container = $app->getContainer();
 
 $container[HookController::class] = function (ContainerInterface $c) {
-	return new HookController($c, $c->get(Handler::class));
+	return new HookController($c, $c->get(HookHandler::class));
 };
 
 $container[BashRestController::class] = function (ContainerInterface $c) {
 	return new BashRestController($c, $c->get(Executor::class));
 };
 
-$container[Handler::class] = function (ContainerInterface $c) {
-	return new Handler($c, $c->get(Executor::class));
+$container[HookHandler::class] = function (ContainerInterface $c) {
+	return new HookHandler($c, $c->get(Executor::class));
 };
 
 $container[Executor::class] = function () {

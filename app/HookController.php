@@ -16,16 +16,12 @@ final class HookController
 	private $secret;
 
 	/**
-	 * @var bool
-	 */
-	private $secured = FALSE;
-
-	/**
 	 * @var callable[]
 	 */
 	private $router;
 
-	public function __construct(ContainerInterface $ci, Handler $handler)
+
+	public function __construct(ContainerInterface $ci, HookHandler $handler)
 	{
 		$this->secret = (string) $ci->get('settings')['secret'];
 
@@ -49,28 +45,73 @@ final class HookController
 
 	public function __invoke(Request $request, Response $response, array $args)
 	{
-		$body = $request->getParsedBody();
-		if ( ! isset($body['object_kind'])) {
+		if ( ! $this->isValid($request)) {
 			return $response->withStatus(500);
 		}
 
-		foreach ($request->getHeader('X-Gitlab-Token') as $secret) {
-			if ($secret == $this->secret) { // allow cast
-				$this->secured = TRUE;
-			}
-		}
-
-		if ($this->secret !== NULL && ! $this->secured) {
+		if ( ! $this->isSecured($request)) {
 			return $response->withStatus(403);
 		}
 
-		if (isset($this->router[$body['object_kind']])) {
-			$this->router[$body['object_kind']]($body);
+		if ($this->isHandled($request)) {
+			$this->handle($request);
 			return $response->withStatus(200);
 		}
 
-
 		return $response->withStatus(404);
+	}
+
+
+	/**
+	 * @param Request $request
+	 * @return bool
+	 */
+	private function isValid(Request $request)
+	{
+		$body = $request->getParsedBody();
+		if ( ! isset($body['object_kind'])) {
+			return FALSE;
+		}
+
+		return TRUE;
+	}
+
+
+	/**
+	 * @param Request $request
+	 * @return bool
+	 */
+	private function isSecured(Request $request)
+	{
+		$secured = FALSE;
+		foreach ($request->getHeader('X-Gitlab-Token') as $secret) {
+			if ($secret == $this->secret) { // allow cast
+				$secured = TRUE;
+			}
+		}
+
+		return $this->secret === NULL || $secured;
+	}
+
+
+	/**
+	 * @param Request $request
+	 * @return bool
+	 */
+	private function isHandled(Request $request)
+	{
+		$body = $request->getParsedBody();
+		return isset($this->router[$body['object_kind']]);
+	}
+
+
+	/**
+	 * @param Request $request
+	 */
+	private function handle(Request $request)
+	{
+		$body = $request->getParsedBody();
+		$this->router[$body['object_kind']]($body);
 	}
 
 }
