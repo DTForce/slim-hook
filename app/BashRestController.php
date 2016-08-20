@@ -20,6 +20,8 @@ use Slim\Http\Response;
 final class BashRestController
 {
 
+	use SecuredTrait;
+
 	const SECRET_HEADER = 'X-Secret';
 
 	/**
@@ -66,23 +68,6 @@ final class BashRestController
 
 		return $response->withStatus(200)
 			->withJson($this->handle($request, $projectName, $action));
-	}
-
-
-	/**
-	 * @param Request $request
-	 * @return bool
-	 */
-	private function isSecured(Request $request)
-	{
-		$secured = FALSE;
-		foreach ($request->getHeader(self::SECRET_HEADER) as $secret) {
-			if ($secret == $this->secret) { // allow cast
-				$secured = TRUE;
-			}
-		}
-
-		return $this->secret === NULL || $secured;
 	}
 
 

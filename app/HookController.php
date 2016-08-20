@@ -10,6 +10,8 @@ use Slim\Http\Response;
 final class HookController
 {
 
+	use SecuredTrait;
+
 	const SECRET_HEADER = 'X-Gitlab-Token';
 
 	/**
@@ -76,23 +78,6 @@ final class HookController
 		}
 
 		return TRUE;
-	}
-
-
-	/**
-	 * @param Request $request
-	 * @return bool
-	 */
-	private function isSecured(Request $request)
-	{
-		$secured = FALSE;
-		foreach ($request->getHeader(self::SECRET_HEADER) as $secret) {
-			if ($secret == $this->secret) { // allow cast
-				$secured = TRUE;
-			}
-		}
-
-		return $this->secret === NULL || $secured;
 	}
 
 

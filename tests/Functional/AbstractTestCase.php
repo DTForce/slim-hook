@@ -62,7 +62,7 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 	 */
 	final protected function runInvalid()
 	{
-		$request = $this->prepareRequest(self::SECRET, [], TRUE);
+		$request = $this->prepareRequest(self::SECRET, []);
 		return $this->runRequest($request, $this->buildApp());
 	}
 
@@ -74,7 +74,7 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 	{
 		$request = $this->prepareRequest(NULL, [
 			'object_kind' => 'push'
-		], TRUE);
+		]);
 		return $this->runRequest($request, $this->buildApp());
 	}
 
@@ -86,7 +86,7 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 	{
 		$request = $this->prepareRequest(self::SECRET, [
 			'object_kind' => 'test'
-		], TRUE);
+		]);
 		return $this->runRequest($request, $this->buildApp());
 	}
 
@@ -173,13 +173,12 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 	/**
 	 * @param string|NULL $secret
 	 * @param array|string $data
-	 * @param bool $encode
 	 * @return Request
 	 */
-	protected function prepareRequest($secret = NULL, $data = '', $encode = FALSE)
+	protected function prepareRequest($secret = NULL, $data = '')
 	{
 		$body = new RequestBody();
-		$body->write($encode ? json_encode($data) : $data);
+		$body->write(is_array($data) ? json_encode($data) : $data);
 
 		return Request::createFromEnvironment($this->prepareEnvironment($secret))
 			->withBody($body);
