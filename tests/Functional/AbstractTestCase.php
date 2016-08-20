@@ -111,7 +111,8 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 					->method('executeCommand')
 					->with($this->equalTo($command), $this->equalTo($values))
 					->will(new PHPUnit_Framework_MockObject_Stub_ReturnCallback(function ($command, $values) {
-						return $values;
+						asort($values);
+						return json_encode($values);
 					}));
 			} else {
 				$mock->expects($this->never())

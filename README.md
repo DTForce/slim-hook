@@ -80,12 +80,6 @@ bashREST:
       1: test2
 ```
 
-The response will be json of the following format:
-```json
-{
-    "result" : "Whatever the script you launched returned to stdout"
-}
-```
 
 If you sent some data (in the form of JSON) in the POST body, the script
 will receive them in its enviroment variables in a flattened form.
@@ -121,11 +115,25 @@ server will need to authorize themselves with this secret. Secret is stored
 in header field `X-Secret`. Notice it is different to the one used by Gitlab 
 Webhooks.
 
-Example of a BashREST call:
-
-```bash
-curl -X POST http://localhost:4000/gitlab-org/gitlab-test/status -H "X-Secret: $BASH_REST_SECRET" -H 'Content-Type: application/json' -d '{"ENV":"production"}'
+### Example of a BashREST call
+Suppose config:
+```yaml
+bashREST:
+  groupName/projectName:
+    deploy: echo Application $HOOK_PROJECT_PATH action $HOOK_ACTION called with ENV set to $HOOK_ENV
 ```
 
+and assume, `shell_exec` launches `sh` or `bash`, then call the action like this:
+```bash
+curl -X POST http://localhost:4000/groupName/projectName/deploy -H "X-Secret: $BASH_REST_SECRET" -H 'Content-Type: application/json' -d '{"ENV":"production"}'
+```
+
+The response will be returned as `application/text` containing result(written to `stdout`)
+of the executed command:
+```json
+Application groupName/projectName action deploy called with ENV set to production
+```
+
+The idea is to have something like RPC for `bash` over HTTP protocol.
 ## That's all
 Hope you like it!

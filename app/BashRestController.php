@@ -62,8 +62,8 @@ final class BashRestController
 			return $response->withStatus(404);
 		}
 
-		return $response->withStatus(200)
-			->withJson($this->handle($request, $projectName, $action));
+		$response = $this->handle($request, $response, $projectName, $action);
+		return $response->withStatus(200);
 	}
 
 
@@ -138,17 +138,21 @@ final class BashRestController
 	 * @param Request $request
 	 * @param string $projectName
 	 * @param string $action
-	 * @return array
+	 * @return Response
 	 */
-	private function handle(Request $request, $projectName, $action)
+	private function handle(Request $request, Response $response, $projectName, $action)
 	{
 		$defaultEnv =  ['HOOK_PROJECT_PATH' => $projectName, 'HOOK_ACTION' => $action];
-		return [
-			'result' => $this->executor->executeCommand(
-				$this->scripts[$projectName][$action],
-				$this->flatten($request->getParsedBody()) + $defaultEnv
-			)
-		];
+		$result = $this->executor->executeCommand(
+			$this->scripts[$projectName][$action],
+			$this->flatten($request->getParsedBody()) + $defaultEnv
+		);
+
+		$body = $response->getBody();
+		$body->rewind();
+		$body->write($result);
+
+		return $response->withHeader('Content-Type', 'application/text;charset=utf-8');
 	}
 
 }

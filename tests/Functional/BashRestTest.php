@@ -114,12 +114,7 @@ class BashRestTest extends AbstractTestCase
 		$response = $this->runAppMocked($data, $env, $command);
 		$this->assertEquals(200, $response->getStatusCode());
 		$responseBody = (string)$response->getBody();
-		$this->assertEquals(
-			[
-				'result' => $env
-			],
-			json_decode($responseBody, TRUE)
-		);
+		$this->assertEquals($env, json_decode($responseBody, TRUE));
 	}
 
 }
