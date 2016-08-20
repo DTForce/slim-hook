@@ -53,6 +53,28 @@ final class BashRestController
 	 */
 	public function __invoke(Request $request, Response $response, array $args)
 	{
+		if ( ! $this->isSecured($request)) {
+			return $response->withStatus(403);
+		}
+
+		$projectName = $args['group'] . '/' . $args['project'];
+		$action = $args['action'];
+
+		if ( ! $this->isHandled($projectName, $action)) {
+			return $response->withStatus(404);
+		}
+
+		return $response->withStatus(200)
+			->withJson($this->handle($request, $projectName, $action));
+	}
+
+
+	/**
+	 * @param Request $request
+	 * @return bool
+	 */
+	private function isSecured(Request $request)
+	{
 		$secured = FALSE;
 		foreach ($request->getHeader(self::SECRET_HEADER) as $secret) {
 			if ($secret == $this->secret) { // allow cast
@@ -60,24 +82,7 @@ final class BashRestController
 			}
 		}
 
-		if ($this->secret !== NULL && ! $secured) {
-			return $response->withStatus(403);
-		}
-
-		$projectName = $args['group'] . '/' . $args['project'];
-		$action = $args['action'];
-
-		if ( ! isset($this->scripts[$projectName][$action])) {
-			return $response->withStatus(404);
-		}
-
-		return $response->withStatus(200)
-			->withJson([
-				'result' => $this->executor->executeCommand(
-					$this->scripts[$projectName][$action],
-					$this->flatten($request->getParsedBody())
-				)
-			]);
+		return $this->secret === NULL || $secured;
 	}
 
 
@@ -112,6 +117,17 @@ final class BashRestController
 
 
 	/**
+	 * @param string $projectName
+	 * @param string $action
+	 * @return bool
+	 */
+	private function isHandled($projectName, $action)
+	{
+		return isset($this->scripts[$projectName][$action]);
+	}
+
+
+	/**
 	 * @param array $actual
 	 * @param array $flattened
 	 * @param array $toProcess
@@ -134,6 +150,23 @@ final class BashRestController
 				}
 			}
 		}
+	}
+
+
+	/**
+	 * @param Request $request
+	 * @param string $projectName
+	 * @param string $action
+	 * @return array
+	 */
+	private function handle(Request $request, $projectName, $action)
+	{
+		return [
+			'result' => $this->executor->executeCommand(
+				$this->scripts[$projectName][$action],
+				$this->flatten($request->getParsedBody())
+			)
+		];
 	}
 
 }
