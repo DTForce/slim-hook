@@ -40,6 +40,7 @@ class BashRestTest extends AbstractTestCase
 					'test' => 3
 				]
 			],
+			'array' => ['a', 'b', 'c'],
 			'last' => 'zxc'
 		];
 
@@ -47,6 +48,9 @@ class BashRestTest extends AbstractTestCase
 			'HOOK_test' => 'a',
 			'HOOK_down_test' => 'b',
 			'HOOK_down_more_test' => 3,
+			'HOOK_array_0' => 'a',
+			'HOOK_array_1' => 'b',
+			'HOOK_array_2' => 'c',
 			'HOOK_last' => 'zxc'
 		] , [
 			'cwd' => 'dir',
@@ -78,6 +82,13 @@ class BashRestTest extends AbstractTestCase
 	{
 		$response = $this->runAppMocked($data, $env, $command);
 		$this->assertEquals(200, $response->getStatusCode());
+		$responseBody = (string)$response->getBody();
+		$this->assertEquals(
+			[
+				'result' => $env
+			],
+			json_decode($responseBody, TRUE)
+		);
 	}
 
 }

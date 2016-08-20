@@ -63,5 +63,59 @@ You can configure Apache in the usual way, or you can launch using PHP embedded 
 ```
 /usr/bin/php7.0 -S localhost:8080 -t /path/to/app/slim-hook/public
 ```
+## BashREST
+For convenience this application can also serve simple REST requests. This can be handy, when you want a result of the script executed
+on the target platform when deploying in gitlab CI. By making request to this server in the following form:
+
+`POST to /groupName/projectName/action`
+
+you will launch a script described in the config like this:
+```yaml
+bashREST:
+  groupName/projectName:
+    action: launch some bash command here
+    action2:
+      cwd: dir
+      0: test1
+      1: test2
+```
+
+The response will be json of the following format:
+```json
+{
+    "result" : "Whatever the script you launched returned to stdout"
+}
+```
+
+If you sent some data (in the form of JSON) in the POST body, the script
+will receive them in its enviroment variables in a flattened form.
+
+Example:
+```json
+{
+    "test" : "asd",
+    "nested" : {
+        "a" : "b",
+        "asd" : "c"
+    }
+    "array" : ["asd", "zxc", "xcvxcv"]
+}
+```
+
+Will result in these environment variables set:
+```bash
+HOOK_test=asd
+HOOK_nested_a=b
+HOOK_nested_asc=c
+HOOK_array_0=asd
+HOOK_array_1=zxc
+HOOK_array_2=xcvxcv
+```
+
+If you set-up your secret in the config script, request to the __BashREST__
+server will need to authorize themselves with this secret. Secret is stored
+in header field `X-Secret`. Notice it is different to the one used by Gitlab 
+Webhooks.
+
 ## That's all
 Hope you like it!

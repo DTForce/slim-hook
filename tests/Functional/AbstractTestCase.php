@@ -3,6 +3,7 @@
 namespace Tests\Functional;
 
 use App\Executor;
+use PHPUnit_Framework_MockObject_Stub_ReturnCallback;
 use Psr\Http\Message\ResponseInterface;
 use Slim\App;
 use Slim\Http\Request;
@@ -101,7 +102,10 @@ abstract class AbstractTestCase extends \PHPUnit_Framework_TestCase
 				if ($command !== NULL) {
 					$mock->expects($this->once())
 						->method('executeCommand')
-						->with($this->equalTo($command), $this->equalTo($values));
+						->with($this->equalTo($command), $this->equalTo($values))
+						->will(new PHPUnit_Framework_MockObject_Stub_ReturnCallback(function ($command, $values) {
+							return $values;
+						}));
 				} else {
 					$mock->expects($this->never())
 						->method('executeCommand');
