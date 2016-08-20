@@ -142,10 +142,11 @@ final class BashRestController
 	 */
 	private function handle(Request $request, $projectName, $action)
 	{
+		$defaultEnv =  ['HOOK_PROJECT_PATH' => $projectName, 'HOOK_ACTION' => $action];
 		return [
 			'result' => $this->executor->executeCommand(
 				$this->scripts[$projectName][$action],
-				$this->flatten($request->getParsedBody())
+				$this->flatten($request->getParsedBody()) + $defaultEnv
 			)
 		];
 	}

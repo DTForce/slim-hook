@@ -102,8 +102,12 @@ Example:
 }
 ```
 
+sent as POST to `/bash-rest/test-app/my-action`
+
 Will result in these environment variables set:
 ```bash
+HOOK_PROJECT_PATH=bash-rest/test-app
+HOOK_ACTION=my-action
 HOOK_test=asd
 HOOK_nested_a=b
 HOOK_nested_asc=c
@@ -116,6 +120,12 @@ If you set-up your secret in the config script, request to the __BashREST__
 server will need to authorize themselves with this secret. Secret is stored
 in header field `X-Secret`. Notice it is different to the one used by Gitlab 
 Webhooks.
+
+Example of a BashREST call:
+
+```bash
+curl -X POST http://localhost:4000/gitlab-org/gitlab-test/status -H "X-Secret: $BASH_REST_SECRET" -H 'Content-Type: application/json' -d '{"ENV":"production"}'
+```
 
 ## That's all
 Hope you like it!

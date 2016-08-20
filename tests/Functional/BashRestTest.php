@@ -18,14 +18,14 @@ class BashRestTest extends AbstractTestCase
 	public function testAction1()
 	{
 		self::setPath('/bash-rest/test-app/action1');
-		$this->simpleTest('', [] , 'test');
+		$this->simpleTest('', ['HOOK_PROJECT_PATH' => 'bash-rest/test-app', 'HOOK_ACTION' => 'action1'] , 'test');
 	}
 
 
 	public function testAction2()
 	{
 		self::setPath('/bash-rest/test-app/action2');
-		$this->simpleTest('[]', [] , [
+		$this->simpleTest('[]', ['HOOK_PROJECT_PATH' => 'bash-rest/test-app', 'HOOK_ACTION' => 'action2'] , [
 			'cwd' => 'dir',
 			'test1',
 			'test2'
@@ -49,6 +49,8 @@ class BashRestTest extends AbstractTestCase
 		];
 
 		$this->simpleTest(json_encode($input), [
+			'HOOK_PROJECT_PATH' => 'bash-rest/test-app',
+			'HOOK_ACTION' => 'action2',
 			'HOOK_test' => 'a',
 			'HOOK_down_test' => 'b',
 			'HOOK_down_more_test' => 3,
