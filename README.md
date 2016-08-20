@@ -21,8 +21,10 @@ scripts:
     push:
       refs/heads/master: - on push, what branch do we consider
         cwd: /path/to/app - optional you can set working directory
-        command: bash /path/to/app/test.bash push - this is going to be executed throug shell_exec
-    tag: bash /path/to/app - on tag no subcategories
+        - bash /path/to/app/test.bash push - this is going to be executed throug shell_exec
+    tag:
+        - bash /path/to/app - on tag no subcategories
+        - bash do-smothin-else - you can execute multiple commands with one hook
   gitlab-org/gitlab-something-else: - more projects
 ```
 ## Variables
