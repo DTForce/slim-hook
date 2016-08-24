@@ -39,7 +39,7 @@ final class BashRestController
 	public function __construct(ContainerInterface $ci, Executor $executor)
 	{
 		$this->executor = $executor;
-		$this->secret = (string) $ci->get('settings')['secret'];
+		$this->secret = $ci->get('settings')['secret'];
 		$this->scripts = (array) $ci->get('bashREST');
 	}
 

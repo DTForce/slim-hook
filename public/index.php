@@ -7,6 +7,7 @@ if (PHP_SAPI == 'cli-server') {
     if (is_file($file)) {
         return false;
     }
+	$_SERVER['SCRIPT_NAME'] = '/' . basename(__FILE__); // work around of - https://github.com/slimphp/Slim/issues/359
 }
 
 require __DIR__ . '/../vendor/autoload.php';
